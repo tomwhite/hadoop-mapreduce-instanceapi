@@ -41,7 +41,7 @@ import org.apache.hadoop.mapred.RunningJob;
  * <p>
  * Instances of classes that implement {@link java.io.Serializable} are
  * considered stateful and their configuration state is preserved so that
- * new instantiations of these instances have the same state.
+ * new instantiations of these instances have the same initial state.
  * <p>
  * For example, consider a {@link Mapper} for implementing grep, which stores
  * the pattern to search for as an instance variable:
