@@ -43,7 +43,7 @@ import org.apache.hadoop.mapred.RunningJob;
  * new instantiations of these instances have the same state.
  * <p>
  * For example, consider a {@link Mapper} for implementing grep, which stores
- * the pattern to serach for as an instance variable:
+ * the pattern to search for as an instance variable:
  * <pre>
  * public class GrepMapper extends MapReduceBase implements
  *    Mapper&lt;LongWritable, Text, Text, LongWritable&gt;, Serializable {
@@ -58,7 +58,7 @@ import org.apache.hadoop.mapred.RunningJob;
  *  }
  *
  *  public void map(LongWritable key, Text value,
- *      OutputCollector<Text, LongWritable> output, Reporter reporter)
+ *      OutputCollector&lt;Text, LongWritable&gt; output, Reporter reporter)
  *      throws IOException {
  *    String text = value.toString();
  *    Matcher matcher = pattern.matcher(text);
