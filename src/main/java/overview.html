@@ -1,0 +1,43 @@
+<body>
+<h1>MapReduce Instance API</h1>
+<p>
+This is a proof of concept for building a new instance-based MapReduce API
+(<a href="https://issues.apache.org/jira/browse/MAPREDUCE-1183">MAPREDUCE-1183</a>)
+layered on top of the existing Hadoop MapReduce APIs.
+It is intended to promote further discussion of what an instance-based API should
+look like.
+</p>
+
+<p>
+<b>Note: the API is not stable, nor
+has the implementation been performance tested.</b>
+<p>
+
+<h2>Features</h2>
+
+<ul>
+<li>Works with Apache Hadoop 0.20.x APIs</li>
+<li>Implementations for the "old" and "new" (context objects) APIs in
+{@link org.apache.hadoop.mapred.lib.instanceapi.MapRedJob} and
+{@link org.apache.hadoop.mapreduce.lib.instanceapi.MapReduceJob}.</li>
+<li>Stateful Mappers, Reducers, etc should implement the <code>java.io.Serializable</code>
+interface. Those that don't implement this interface are treated as they are in the existing APIs,
+i.e. passed by class name. (<a href="https://issues.apache.org/jira/browse/MAPREDUCE-1183?focusedCommentId=12773786&page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel#action_12773786">Suggested by Hong Tang</a>.)</li>
+<li>Provides better type checking (but not inference, due to erasure) of key and value types than the existing API.</li>
+</ul>
+
+<h2>Open issues</h2>
+
+<ul>
+<li>Should we expose all of the old and new APIs through the new object, or should uses just use the <code>JobConf</code> or <code>Job</code> to access APIs that are the same?</li>
+</ul>
+
+
+<h2>Implementation notes</h2>
+
+<p>
+Stateful components are serialized using the Java Serialization API, and stored in
+the Hadoop configuration by Base64-encoding the serialized bytes. This is transparent to the
+user.
+</p>
+<body>
