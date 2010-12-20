@@ -26,7 +26,7 @@ import org.apache.hadoop.mapred.lib.instanceapi.SerializableUtil;
 
 public class SerializableMapperDelegator<K1, V1, K2, V2> extends Mapper<K1, V1, K2, V2> implements Configurable {
 
-  public static final String MAP_CLASS_BYTES = "mapreduce.mapper.class.bytes";
+  static final String BYTES_PROPERTY = "mapreduce.mapper.class.bytes";
   
   private Configuration conf;
   private Mapper<K1, V1, K2, V2> delegate;
@@ -34,7 +34,7 @@ public class SerializableMapperDelegator<K1, V1, K2, V2> extends Mapper<K1, V1, 
   public static <K1, V1, K2, V2> void setDelegate(Job job,
       Mapper<K1, V1, K2, V2> delegate) throws IOException {
     job.setMapperClass(SerializableMapperDelegator.class);
-    SerializableUtil.serializeObject(job.getConfiguration(), MAP_CLASS_BYTES,
+    SerializableUtil.serializeObject(job.getConfiguration(), BYTES_PROPERTY,
         delegate);
   }
   
@@ -45,7 +45,7 @@ public class SerializableMapperDelegator<K1, V1, K2, V2> extends Mapper<K1, V1, 
 
   @Override
   public void setConf(Configuration conf) {
-    delegate = SerializableUtil.deserializeObject(conf, MAP_CLASS_BYTES);
+    delegate = SerializableUtil.deserializeObject(conf, BYTES_PROPERTY);
     this.conf = conf;
   }
   
