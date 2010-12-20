@@ -31,7 +31,7 @@ import org.apache.hadoop.mapred.Reporter;
 @SuppressWarnings("deprecation")
 class SerializableReducerDelegator<K2, V2, K3, V3> implements Reducer<K2, V2, K3, V3>, Configurable {
   
-  static final String REDUCE_CLASS_BYTES = "mapred.reducer.class.bytes";
+  static final String BYTES_PROPERTY = "mapred.reducer.class.bytes";
 
   private Configuration conf;
   private Reducer<K2, V2, K3, V3> delegate;
@@ -39,7 +39,7 @@ class SerializableReducerDelegator<K2, V2, K3, V3> implements Reducer<K2, V2, K3
   public static <K2, V2, K3, V3> void setDelegate(JobConf job,
       Reducer<K2, V2, K3, V3> delegate) throws IOException {
     job.setReducerClass(SerializableReducerDelegator.class);
-    SerializableUtil.serializeObject(job, REDUCE_CLASS_BYTES, delegate);
+    SerializableUtil.serializeObject(job, BYTES_PROPERTY, delegate);
   }
 
   @Override
@@ -49,7 +49,7 @@ class SerializableReducerDelegator<K2, V2, K3, V3> implements Reducer<K2, V2, K3
 
   @Override
   public void setConf(Configuration conf) {
-    delegate = SerializableUtil.deserializeObject(conf, REDUCE_CLASS_BYTES);
+    delegate = SerializableUtil.deserializeObject(conf, BYTES_PROPERTY);
     this.conf = conf;
   }
 

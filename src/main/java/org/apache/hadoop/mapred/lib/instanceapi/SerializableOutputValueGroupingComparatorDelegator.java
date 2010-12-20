@@ -27,19 +27,19 @@ import org.apache.hadoop.mapred.JobConfigurable;
 @SuppressWarnings("deprecation")
 class SerializableOutputValueGroupingComparatorDelegator<V2> implements RawComparator<V2>, JobConfigurable {
   
-  static final String OUTPUT_VALUE_GROUPING_COMPARATOR_CLASS_BYTES = "mapreduce.job.output.group.comparator.classbytes";
+  static final String BYTES_PROPERTY = "mapreduce.job.output.group.comparator.classbytes";
 
   private RawComparator<V2> delegate;
   
   public static <V2> void setDelegate(JobConf job,
       RawComparator<V2> delegate) throws IOException {
     job.setOutputValueGroupingComparator(SerializableOutputValueGroupingComparatorDelegator.class);
-    SerializableUtil.serializeObject(job, OUTPUT_VALUE_GROUPING_COMPARATOR_CLASS_BYTES, delegate);
+    SerializableUtil.serializeObject(job, BYTES_PROPERTY, delegate);
   }
   
   @Override
   public void configure(JobConf job) {
-    delegate = SerializableUtil.deserializeObject(job, OUTPUT_VALUE_GROUPING_COMPARATOR_CLASS_BYTES);
+    delegate = SerializableUtil.deserializeObject(job, BYTES_PROPERTY);
   }
 
   @Override

@@ -27,19 +27,19 @@ import org.apache.hadoop.mapred.Partitioner;
 @SuppressWarnings("deprecation")
 class SerializablePartitionerDelegator<K2, V2> implements Partitioner<K2, V2>, JobConfigurable {
   
-  static final String PARTITIONER_CLASS_BYTES = "mapred.partitioner.class.bytes";
+  static final String BYTES_PROPERTY = "mapred.partitioner.class.bytes";
 
   private Partitioner<K2, V2> delegate;
   
   public static <K2, V2> void setDelegate(JobConf job,
       Partitioner<K2, V2> delegate) throws IOException {
     job.setPartitionerClass(SerializablePartitionerDelegator.class);
-    SerializableUtil.serializeObject(job, PARTITIONER_CLASS_BYTES, delegate);
+    SerializableUtil.serializeObject(job, BYTES_PROPERTY, delegate);
   }
 
   @Override
   public void configure(JobConf job) {
-    delegate = SerializableUtil.deserializeObject(job, PARTITIONER_CLASS_BYTES);
+    delegate = SerializableUtil.deserializeObject(job, BYTES_PROPERTY);
   }
 
   @Override
