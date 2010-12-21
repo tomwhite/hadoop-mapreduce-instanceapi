@@ -108,8 +108,8 @@ public class TestMapReduceJob extends TestCase {
     mrJob.setMapper(new GrepMapper("foo"));
     mrJob.setReducer(new LongSumReducer<Text>());
     
-    job.setOutputKeyClass(Text.class);
-    job.setOutputValueClass(LongWritable.class);
+    mrJob.setOutputKeyClass(Text.class);
+    mrJob.setOutputValueClass(LongWritable.class);
     
     FileInputFormat.setInputPaths(job, INPUT_DIR);
     FileOutputFormat.setOutputPath(job, OUTPUT_DIR);

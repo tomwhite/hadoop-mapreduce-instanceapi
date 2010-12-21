@@ -32,36 +32,86 @@ import org.apache.hadoop.mapreduce.SerializableCombinerDelegator;
 import org.apache.hadoop.mapreduce.SerializableMapperDelegator;
 import org.apache.hadoop.mapreduce.SerializableReducerDelegator;
 
+/**
+ * An interface for configuring and running MapReduce jobs. This is an
+ * alternative to {@link Job}, in that it uses instances rather than classes
+ * for configuration. All the basic types ({@link Mapper}, {@link Reducer}, and
+ * so on) are the same, however.
+ * <p>
+ * Instances of classes that implement {@link java.io.Serializable} are
+ * considered stateful and their configuration state is preserved so that
+ * new instantiations of these instances have the same initial state.
+ * <p>
+ * For example, consider a {@link Mapper} for implementing grep, which stores
+ * the pattern to search for as an instance variable:
+ * <pre>
+ * public class GrepMapper extends Mapper&lt;LongWritable, Text, Text, LongWritable&gt;
+ *    implements Serializable {
+ *  
+ *  private Pattern pattern;
+ *  
+ *  public GrepMapper() {
+ *  }
+ *  
+ *  public GrepMapper(String pattern) {
+ *    this.pattern = Pattern.compile(pattern);
+ *  }
+ *
+ *  protected void map(LongWritable key, Text value,
+ *      Mapper&lt;LongWritable,Text,Text,LongWritable&gt;.Context context)
+ *      throws IOException, InterruptedException {
+ *    String text = value.toString();
+ *    Matcher matcher = pattern.matcher(text);
+ *    while (matcher.find()) {
+ *      context.write(new Text(matcher.group(0)), new LongWritable(1));
+ *    }
+ *  }
+ * }
+ * </pre>
+ * To use this class an instance of <code>GrepMapper</code> is passed to
+ * an instance of <code>MapReduceJob</code>.
+ * <pre>
+ *  MapReduceJob&lt;LongWritable, Text, Text, LongWritable, Text, LongWritable&gt; job =
+ *    MapReduceJob.newJob();
+ *  job.setMapper(new GrepMapper("foo"));
+ *  job.setReducer(new LongSumReducer&lt;Text&gt;());
+ *  job.setOutputKeyClass(Text.class);
+ *  job.setOutputValueClass(LongWritable.class);
+ *  ...
+ *  job.waitForCompletion(true);
+ * </pre>
+ */
 public class MapReduceJob<K1, V1, K2, V2, K3, V3> {
 
   private Job job;
-  
-  public static <K1, V1, K2, V2, K3, V3> MapReduceJob<K1, V1, K2, V2, K3, V3>
-      newJob() throws IOException {
+
+  public static <K1, V1, K2, V2, K3, V3> MapReduceJob<K1, V1, K2, V2, K3, V3> newJob()
+      throws IOException {
     return new MapReduceJob<K1, V1, K2, V2, K3, V3>();
   }
-  
-  public static <K1, V1, K2, V2, K3, V3> MapReduceJob<K1, V1, K2, V2, K3, V3>
-      newJob(Job job) throws IOException {
+
+  public static <K1, V1, K2, V2, K3, V3> MapReduceJob<K1, V1, K2, V2, K3, V3> newJob(
+      Job job) throws IOException {
     return new MapReduceJob<K1, V1, K2, V2, K3, V3>(job);
   }
-  
+
   MapReduceJob() throws IOException {
     this(new Job());
   }
-  
+
   MapReduceJob(Job job) throws IOException {
     this.job = job;
   }
-  
-  public void setInputFormat(InputFormat<K1, V1> inputFormat) throws IOException {
+
+  public void setInputFormat(InputFormat<K1, V1> inputFormat)
+      throws IOException {
     if (inputFormat instanceof Serializable) {
       SerializableInputFormatDelegator.setDelegate(job, inputFormat);
     } else {
       job.setInputFormatClass(inputFormat.getClass());
     }
-  }  
-  
+  }
+
   public void setMapper(Mapper<K1, V1, K2, V2> mapper) throws IOException {
     if (mapper instanceof Serializable) {
       SerializableMapperDelegator.setDelegate(job, mapper);
@@ -70,15 +120,17 @@ public class MapReduceJob<K1, V1, K2, V2, K3, V3> {
     }
   }
 
-  public void setPartitioner(Partitioner<K2, V2> partitioner) throws IOException {
+  public void setPartitioner(Partitioner<K2, V2> partitioner)
+      throws IOException {
     if (partitioner instanceof Serializable) {
       SerializablePartitionerDelegator.setDelegate(job, partitioner);
     } else {
       job.setPartitionerClass(partitioner.getClass());
     }
   }
-  
-  public void setSortComparator(RawComparator<K2> sortComparator) throws IOException {
+
+  public void setSortComparator(RawComparator<K2> sortComparator)
+      throws IOException {
     if (sortComparator instanceof Serializable) {
       SerializableSortComparatorDelegator.setDelegate(job, sortComparator);
     } else {
@@ -86,14 +138,16 @@ public class MapReduceJob<K1, V1, K2, V2, K3, V3> {
     }
   }
 
-  public void setGroupingComparator(RawComparator<V2> groupingComparator) throws IOException {
+  public void setGroupingComparator(RawComparator<V2> groupingComparator)
+      throws IOException {
     if (groupingComparator instanceof Serializable) {
-      SerializableGroupingComparatorDelegator.setDelegate(job, groupingComparator);
+      SerializableGroupingComparatorDelegator.setDelegate(job,
+          groupingComparator);
     } else {
       job.setGroupingComparatorClass(groupingComparator.getClass());
     }
   }
-  
+
   public void setCombiner(Reducer<K2, V2, K2, V2> combiner) throws IOException {
     if (combiner instanceof Serializable) {
       SerializableCombinerDelegator.setDelegate(job, combiner);
@@ -109,15 +163,16 @@ public class MapReduceJob<K1, V1, K2, V2, K3, V3> {
       job.setReducerClass(reducer.getClass());
     }
   }
-  
-  public void setOutputFormat(OutputFormat<K3, V3> outputFormat) throws IOException {
+
+  public void setOutputFormat(OutputFormat<K3, V3> outputFormat)
+      throws IOException {
     if (outputFormat instanceof Serializable) {
       SerializableOutputFormatDelegator.setDelegate(job, outputFormat);
     } else {
       job.setOutputFormatClass(outputFormat.getClass());
     }
   }
-  
+
   public void setMapOutputKeyClass(Class<K2> theClass) {
     job.setMapOutputKeyClass(theClass);
   }
