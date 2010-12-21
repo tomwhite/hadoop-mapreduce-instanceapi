@@ -21,10 +21,16 @@ package org.apache.hadoop.mapreduce.lib.instanceapi;
 import java.io.IOException;
 import java.io.Serializable;
 
+import org.apache.hadoop.io.RawComparator;
+import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.OutputFormat;
+import org.apache.hadoop.mapreduce.Partitioner;
 import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mapreduce.SerializableCombinerDelegator;
 import org.apache.hadoop.mapreduce.SerializableMapperDelegator;
+import org.apache.hadoop.mapreduce.SerializableReducerDelegator;
 
 public class MapReduceJob<K1, V1, K2, V2, K3, V3> {
 
@@ -48,6 +54,14 @@ public class MapReduceJob<K1, V1, K2, V2, K3, V3> {
     this.job = job;
   }
   
+  public void setInputFormat(InputFormat<K1, V1> inputFormat) throws IOException {
+    if (inputFormat instanceof Serializable) {
+      SerializableInputFormatDelegator.setDelegate(job, inputFormat);
+    } else {
+      job.setInputFormatClass(inputFormat.getClass());
+    }
+  }  
+  
   public void setMapper(Mapper<K1, V1, K2, V2> mapper) throws IOException {
     if (mapper instanceof Serializable) {
       SerializableMapperDelegator.setDelegate(job, mapper);
@@ -56,15 +70,72 @@ public class MapReduceJob<K1, V1, K2, V2, K3, V3> {
     }
   }
 
+  public void setPartitioner(Partitioner<K2, V2> partitioner) throws IOException {
+    if (partitioner instanceof Serializable) {
+      SerializablePartitionerDelegator.setDelegate(job, partitioner);
+    } else {
+      job.setPartitionerClass(partitioner.getClass());
+    }
+  }
+  
+  public void setSortComparator(RawComparator<K2> sortComparator) throws IOException {
+    if (sortComparator instanceof Serializable) {
+      SerializableSortComparatorDelegator.setDelegate(job, sortComparator);
+    } else {
+      job.setSortComparatorClass(sortComparator.getClass());
+    }
+  }
+
+  public void setGroupingComparator(RawComparator<V2> groupingComparator) throws IOException {
+    if (groupingComparator instanceof Serializable) {
+      SerializableGroupingComparatorDelegator.setDelegate(job, groupingComparator);
+    } else {
+      job.setGroupingComparatorClass(groupingComparator.getClass());
+    }
+  }
+  
+  public void setCombiner(Reducer<K2, V2, K2, V2> combiner) throws IOException {
+    if (combiner instanceof Serializable) {
+      SerializableCombinerDelegator.setDelegate(job, combiner);
+    } else {
+      job.setCombinerClass(combiner.getClass());
+    }
+  }
+
   public void setReducer(Reducer<K2, V2, K3, V3> reducer) throws IOException {
     if (reducer instanceof Serializable) {
-      // TODO
+      SerializableReducerDelegator.setDelegate(job, reducer);
     } else {
       job.setReducerClass(reducer.getClass());
     }
   }
-  public void runJob() throws IOException, InterruptedException,
-      ClassNotFoundException {
-    job.waitForCompletion(true);
+  
+  public void setOutputFormat(OutputFormat<K3, V3> outputFormat) throws IOException {
+    if (outputFormat instanceof Serializable) {
+      SerializableOutputFormatDelegator.setDelegate(job, outputFormat);
+    } else {
+      job.setOutputFormatClass(outputFormat.getClass());
+    }
+  }
+  
+  public void setMapOutputKeyClass(Class<K2> theClass) {
+    job.setMapOutputKeyClass(theClass);
+  }
+
+  public void setMapOutputValueClass(Class<V2> theClass) {
+    job.setMapOutputValueClass(theClass);
+  }
+
+  public void setOutputKeyClass(Class<K3> theClass) {
+    job.setOutputKeyClass(theClass);
+  }
+
+  public void setOutputValueClass(Class<V3> theClass) {
+    job.setOutputValueClass(theClass);
+  }
+
+  public boolean waitForCompletion(boolean verbose) throws IOException,
+      InterruptedException, ClassNotFoundException {
+    return job.waitForCompletion(true);
   }
 }
